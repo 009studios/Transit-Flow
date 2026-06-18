@@ -1,250 +1,250 @@
-                    ctx.strokeStyle = this.color;
-                    ctx.fillStyle = this.color;
-                }
-                
-                ctx.lineWidth = lw;
-                ctx.lineJoin = 'round';
-                ctx.lineCap = 'round';
-
-                if (this.type === 'bus') ctx.setLineDash([10, 10]);
-                else ctx.setLineDash([]);
-
-                // Draw each segment individually with its perpendicular side-by-side offset
-                for (let i = 0; i < pts.length - 1; i++) {
-                    const p1 = pts[i];
-                    const p2 = pts[i+1];
-                    const s1 = state.stations.find(s => s.x === p1.x && s.y === p1.y);
-                    const s2 = state.stations.find(s => s.x === p2.x && s.y === p2.y);
-                    
-                    const offset = getSegmentOffset(s1, s2, this);
-
-                    let drawStart = { x: p1.x + offset.x, y: p1.y + offset.y };
-                    let drawEnd = { x: p2.x + offset.x, y: p2.y + offset.y };
-
-                    if (i === 0) {
-                        let dx = p2.x - p1.x;
-                        let dy = p2.y - p1.y;
-                        let dist = Math.sqrt(dx*dx + dy*dy) || 1;
-                        drawStart.x -= (dx/dist) * extLen;
-                        drawStart.y -= (dy/dist) * extLen;
-                    }
-                    if (i === pts.length - 2) {
-                        let dx = p2.x - p1.x;
-                        let dy = p2.y - p1.y;
-                        let dist = Math.sqrt(dx*dx + dy*dy) || 1;
-                        drawEnd.x += (dx/dist) * extLen;
-                        drawEnd.y += (dy/dist) * extLen;
-                    }
-
+                    ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.moveTo(drawStart.x, drawStart.y);
-                    ctx.lineTo(drawEnd.x, drawEnd.y);
+                    ctx.moveTo(prevP.x, prevP.y);
+                    ctx.lineTo(p.x, p.y);
                     ctx.stroke();
-                }
 
-                ctx.setLineDash([]); // Reset dash for terminals
-
-                // Find terminal offset calculations for end-caps
-                const pFirst = pts[0];
-                const pSecond = pts[1];
-                const sFirst = state.stations.find(s => s.x === pFirst.x && s.y === pFirst.y);
-                const sSecond = state.stations.find(s => s.x === pSecond.x && s.y === pSecond.y);
-                const firstOffset = getSegmentOffset(sFirst, sSecond, this);
-                
-                let dxStart = pSecond.x - pFirst.x;
-                let dyStart = pSecond.y - pFirst.y;
-                let distStart = Math.sqrt(dxStart*dxStart + dyStart*dyStart) || 1;
-                let pStartCap = { 
-                    x: pFirst.x + firstOffset.x - (dxStart/distStart) * extLen, 
-                    y: pFirst.y + firstOffset.y - (dyStart/distStart) * extLen 
-                };
-
-                const pLast = pts[pts.length - 1];
-                const pPenultimate = pts[pts.length - 2];
-                const sLast = state.stations.find(s => s.x === pLast.x && s.y === pLast.y);
-                const sPenultimate = state.stations.find(s => s.x === pPenultimate.x && s.y === pPenultimate.y);
-                const lastOffset = getSegmentOffset(sPenultimate, sLast, this);
-
-                let dxEnd = pLast.x - pPenultimate.x;
-                let dyEnd = pLast.y - pPenultimate.y;
-                let distEnd = Math.sqrt(dxEnd*dxEnd + dyEnd*dyEnd) || 1;
-                let uxEnd = dxEnd / distEnd;
-                let uyEnd = dyEnd / distEnd;
-                let pEndCap = { 
-                    x: pLast.x + lastOffset.x + uxEnd * extLen, 
-                    y: pLast.y + lastOffset.y + uyEnd * extLen 
-                };
-
-                // Draw Start Point Cap (Circle)
-                ctx.beginPath();
-                ctx.arc(pStartCap.x, pStartCap.y, lw * 0.8, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Draw End Point Cap (Perpendicular T-Bar)
-                let capWidth = lw * 1.3;
-                ctx.beginPath();
-                ctx.moveTo(pEndCap.x - uyEnd * capWidth, pEndCap.y + uxEnd * capWidth);
-                ctx.lineTo(pEndCap.x + uyEnd * capWidth, pEndCap.y - uxEnd * capWidth);
-                ctx.stroke();
-
-                if (this.type === 'bus') {
-                    let displayCount = this.stations.length;
-                    let isExtending = state.dragStartStation && state.buildMode === 'bus' && this.stations[this.stations.length - 1] === state.dragStartStation && state.hoveredTargetStation && !this.stations.includes(state.hoveredTargetStation);
-                    let isInserting = dragData && dragData.line === this && state.hoveredTargetStation && !this.stations.includes(state.hoveredTargetStation);
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.angle);
                     
-                    if (isExtending || isInserting) displayCount++;
-                    if (displayCount > 7) displayCount = 7; 
+                    ctx.strokeStyle = '#f8fafc';
+                    ctx.lineWidth = 2.5;
+                    ctx.fillStyle = this.line.color;
+                    ctx.beginPath();
+                    ctx.roundRect(-15, -7, 30, 14, 5);
+                    ctx.fill();
+                    ctx.stroke();
 
-                    let startX = pEndCap.x + 12;
-                    let startY = pEndCap.y + 12;
-                    ctx.lineWidth = 1;
-                    
-                    for (let i = 0; i < 7; i++) {
-                        let bx = startX + (i % 4) * 6; 
-                        let by = startY + Math.floor(i / 4) * 6; 
-                        if (i < displayCount) {
-                            ctx.fillStyle = this.color;
-                            ctx.fillRect(bx, by, 4, 4); 
-                        } else {
-                            ctx.strokeStyle = this.color;
-                            ctx.strokeRect(bx + 0.5, by + 0.5, 3, 3); 
-                        }
-                    }
+                    ctx.fillStyle = '#475569';
+                    ctx.fillRect(-10, -4, 4, 1.5);
+                    ctx.fillRect(-2, -4, 4, 1.5);
+                    ctx.fillRect(6, -4, 4, 1.5);
+                    ctx.fillRect(-10, 2.5, 4, 1.5);
+                    ctx.fillRect(-2, 2.5, 4, 1.5);
+                    ctx.fillRect(6, 2.5, 4, 1.5);
+
+                    const passengersInThisCar = this.passengers.slice(6 + (b - 1) * 4, 6 + b * 4);
+                    ctx.fillStyle = '#ffffff';
+                    passengersInThisCar.forEach((pObj, idx) => {
+                        let px = -9 + (idx * 6);
+                        let py = 0;
+                        ctx.save();
+                        ctx.translate(px, py);
+                        ctx.rotate(-p.angle);
+                        drawShape(ctx, 0, 0, pObj.target, 2, true);
+                        ctx.restore();
+                    });
+
+                    ctx.restore();
                 }
             }
-            
-            getShapesServed() { return [...new Set(this.stations.map(s => s.type))]; }
         }
 
-        // --- STREAMING_CHUNK: Modeling vehicle and trailing coaches with dynamic station stops... ---
-        class Vehicle {
-            constructor(line, startIdx = 0) {
-                this.line = line;
-                this.currentStationIdx = startIdx;
-                this.targetStationIdx = startIdx + 1;
-                if(this.targetStationIdx >= line.stations.length) this.targetStationIdx = Math.max(0, startIdx - 1);
-                
-                this.progress = 0;
-                this.direction = this.targetStationIdx > this.currentStationIdx ? 1 : -1;
-                this.passengers = [];
-                this.speed = line.type === 'metro' ? CONFIG.metroSpeed : CONFIG.busSpeed;
-                this.capacity = line.type === 'metro' ? CONFIG.metroCapacity : CONFIG.busCapacity;
-                this.ghostTrip = null;
-                this.boogies = 0; 
-                this.posHistory = []; 
-                this.stopTimer = 0; // Number of frames to stay stopped at a station for boarding/deboarding
+        // --- STREAMING_CHUNK: Shape builders and procedurally spawning logic... ---
+        function drawShape(ctx, x, y, type, size, fill = false) {
+            ctx.beginPath();
+            if (type === 'circle') ctx.arc(x, y, size, 0, Math.PI * 2);
+            else if (type === 'square') ctx.rect(x - size, y - size, size * 2, size * 2);
+            else if (type === 'triangle') {
+                ctx.moveTo(x, y - size); ctx.lineTo(x + size, y + size); ctx.lineTo(x - size, y + size); ctx.closePath();
             }
+            if (fill) ctx.fill(); else { ctx.fill(); ctx.stroke(); }
+        }
 
-            update() {
-                // If currently paused at a station for transfers, tick down timer and remain in place
-                if (this.stopTimer > 0) {
-                    this.stopTimer--;
-                    let s = this.line.stations[this.currentStationIdx];
-                    if (s) {
-                        const offset = (this.currentStationIdx < this.line.stations.length - 1) 
-                            ? getSegmentOffset(s, this.line.stations[this.currentStationIdx+1], this.line) 
-                            : {x:0, y:0};
-                        this.x = s.x + offset.x;
-                        this.y = s.y + offset.y;
-                        let nextS = this.line.stations[this.targetStationIdx];
-                        if (nextS) {
-                            this.angle = Math.atan2(nextS.y - s.y, nextS.x - s.x);
-                        }
-                        this.posHistory.unshift({ x: this.x, y: this.y, angle: this.angle });
-                        if (this.posHistory.length > 200) this.posHistory.pop();
+        function resize() {
+            const pixelRatio = window.devicePixelRatio || 1;
+            width = window.innerWidth; 
+            height = window.innerHeight;
+            canvas.width = width * pixelRatio; 
+            canvas.height = height * pixelRatio;
+            
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(pixelRatio, pixelRatio);
+        }
+
+        function checkMilestones() {
+            if (state.score >= state.nextStationScoreTarget) {
+                spawnStation();
+                state.nextStationScoreTarget += 5 + Math.floor(state.stations.length * 1.5);
+                
+                popInventory('metro');
+                popInventory('bus');
+            }
+        }
+
+        function spawnStation() {
+            const padding = 60;
+            let r = Math.random();
+            let type = 'circle';
+            if (state.stations.length === 0) type = 'square';
+            else if (r > 0.8) type = 'triangle';
+            else if (r > 0.95 && state.stations.filter(s=>s.type==='square').length < 2) type = 'square';
+
+            let x, y, valid = false;
+            let attempts = 0;
+            while (!valid && attempts < 100) {
+                x = padding + Math.random() * (width - padding * 2);
+                y = padding + Math.random() * (height - padding * 2);
+                if (y < 120 || y > height - 100) continue; 
+                
+                const clearOfStations = state.stations.every(s => Math.sqrt((s.x-x)**2 + (s.y-y)**2) > 90);
+                const clearOfRiver = !state.river || state.river.points.every((point, index, points) => {
+                    if (index === points.length - 1) return true;
+                    return distToSegmentSquared({ x, y }, point, points[index + 1]) > 2500;
+                });
+                valid = clearOfStations && clearOfRiver;
+                attempts++;
+            }
+            if(valid) state.stations.push(new Station(x, y, type));
+        }
+
+        function spawnPassenger() {
+            if (state.stations.length < 2) return;
+            const station = state.stations[Math.floor(Math.random() * state.stations.length)];
+            let destTypes = [...new Set(state.stations.map(s => s.type))].filter(t => t !== station.type);
+            if (destTypes.length === 0) return;
+            const dest = destTypes[Math.floor(Math.random() * destTypes.length)];
+            station.passengers.push({ target: dest, transferStationId: null });
+        }
+
+        // --- BFS GRAPH PATHFINDING ---
+        function findShortestPathToType(startStation, targetType) {
+            if (startStation.type === targetType) return [startStation];
+
+            let queue = [ [startStation] ];
+            let visited = new Set([startStation.id]);
+
+            while (queue.length > 0) {
+                let path = queue.shift();
+                let curr = path[path.length - 1];
+
+                if (curr.type === targetType) {
+                    return path;
+                }
+
+                let neighbors = getStationNeighbors(curr);
+                for (let nb of neighbors) {
+                    if (!visited.has(nb.id)) {
+                        visited.add(nb.id);
+                        queue.push([...path, nb]);
                     }
-                    return;
                 }
+            }
+            return null;
+        }
 
-                let start, end;
-                if (this.ghostTrip) {
-                    start = this.ghostTrip.start;
-                    end = this.ghostTrip.end;
-                    const dist = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)) || 1;
-                    this.progress += (this.speed / dist);
-
-                    if (this.progress >= 1) {
-                        const transferOccurred = this.arriveAtStation(end);
-                        this.progress = 0;
-                        this.ghostTrip = null;
-
-                        let idx = this.line.stations.indexOf(end);
-                        if (idx !== -1) {
-                            this.currentStationIdx = idx;
-                            this.targetStationIdx = idx + this.direction;
-                            if (this.targetStationIdx < 0 || this.targetStationIdx >= this.line.stations.length) {
-                                this.direction *= -1;
-                                this.targetStationIdx = this.currentStationIdx + this.direction;
-                                if(this.targetStationIdx < 0) {
-                                    this.targetStationIdx = 0; this.currentStationIdx = 0; this.direction = 1;
-                                    if(this.line.stations.length > 1) this.targetStationIdx = 1;
-                                }
-                            }
-                        } else {
-                            let closestIdx = 0;
-                            let minDist = Infinity;
-                            for (let i = 0; i < this.line.stations.length; i++) {
-                                let d = getDist(end, this.line.stations[i]);
-                                if (d < minDist) {
-                                    minDist = d;
-                                    closestIdx = i;
-                                }
-                            }
-                            this.currentStationIdx = closestIdx;
-                            this.targetStationIdx = closestIdx + this.direction;
-                            if (this.targetStationIdx < 0 || this.targetStationIdx >= this.line.stations.length) {
-                                this.direction *= -1;
-                                this.targetStationIdx = this.currentStationIdx + this.direction;
-                                if(this.targetStationIdx < 0) {
-                                     this.targetStationIdx = 0; this.currentStationIdx = 0; this.direction = 1;
-                                     if(this.line.stations.length > 1) this.targetStationIdx = 1;
-                                }
-                            }
-                        }
-
-                        // Stop at station if boarding/deboarding occurred
-                        if (transferOccurred) {
-                            this.stopTimer = 45;
-                        }
+        function getStationNeighbors(station) {
+            let neighbors = new Set();
+            state.lines.forEach(line => {
+                for (let i = 0; i < line.stations.length; i++) {
+                    if (line.stations[i] === station) {
+                        if (i > 0) neighbors.add(line.stations[i - 1]);
+                        if (i < line.stations.length - 1) neighbors.add(line.stations[i + 1]);
                     }
-                    
-                    if (start && end) {
-                        const offset = getSegmentOffset(start, end, this.line);
-                        this.x = start.x + offset.x + (end.x - start.x) * this.progress;
-                        this.y = start.y + offset.y + (end.y - start.y) * this.progress;
-                        this.angle = Math.atan2(end.y - start.y, end.x - start.x);
-                        this.posHistory.unshift({ x: this.x, y: this.y, angle: this.angle });
-                        if (this.posHistory.length > 200) this.posHistory.pop();
+                }
+            });
+            return Array.from(neighbors);
+        }
+
+        // --- STREAMING_CHUNK: Math, bounds detectors, and grid calculations... ---
+        function distToSegmentSquared(p, v, w) {
+            let l2 = Math.pow(v.x - w.x, 2) + Math.pow(v.y - w.y, 2);
+            if (l2 === 0) return Math.pow(p.x - v.x, 2) + Math.pow(p.y - v.y, 2);
+            let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.pow(p.x - (v.x + t * (w.x - v.x)), 2) + Math.pow(p.y - (v.y + t * (w.y - v.y)), 2);
+        }
+
+        function getHoveredLineSegment(x, y) {
+            let closestLine = null;
+            let closestIndex = -1;
+            let minDistSq = 400; 
+            for (let line of state.lines) {
+                if (line.stations.length < 2) continue;
+                for (let i = 0; i < line.stations.length - 1; i++) {
+                    let dSq = distToSegmentSquared({x, y}, line.stations[i], line.stations[i+1]);
+                    if (dSq < minDistSq) {
+                        minDistSq = dSq;
+                        closestLine = line;
+                        closestIndex = i;
                     }
-                    return;
                 }
+            }
+            return { line: closestLine, index: closestIndex };
+        }
 
-                if (this.line.stations.length < 2) return;
+        function getHoveredStation(x, y) {
+            return state.stations.find(s => Math.sqrt((s.x-x)**2 + (s.y-y)**2) < CONFIG.stationRadius * 2.5);
+        }
 
-                start = this.line.stations[this.currentStationIdx];
-                end = this.line.stations[this.targetStationIdx];
-                if (!start || !end) {
-                    this.currentStationIdx = 0;
-                    this.targetStationIdx = 1;
-                    return;
+        function getHoveredVehicle(x, y) {
+            return state.vehicles.find(v => v.line.type === 'metro' && getDist({ x, y }, v) < 30);
+        }
+
+        function getDist(p1, p2) {
+            return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        }
+
+        function reconcileVehicles(line, oldStations) {
+            state.vehicles.forEach(v => {
+                if (v.line === line && !v.ghostTrip) {
+                    if (v.currentStationIdx >= oldStations.length || v.targetStationIdx >= oldStations.length) return;
+
+                    let s1 = oldStations[v.currentStationIdx];
+                    let s2 = oldStations[v.targetStationIdx];
+
+                    let idx1 = line.stations.indexOf(s1);
+                    let idx2 = line.stations.indexOf(s2);
+
+                    if (idx1 !== -1 && idx2 !== -1 && Math.abs(idx1 - idx2) === 1) {
+                        v.currentStationIdx = idx1;
+                        v.targetStationIdx = idx2;
+                    } else {
+                        v.ghostTrip = { start: s1, end: s2 };
+                    }
                 }
+            });
+        }
 
-                const dist = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-                this.progress += (this.speed / dist);
+        // --- STREAMING_CHUNK: Managing side-panel layout, popup badges and inventory UI... ---
+        function popInventory(type) {
+            if (type === 'bridge' || type === 'tunnel') {
+                const el = document.getElementById(type === 'bridge' ? 'bridgeCount' : 'tunnelCount');
+                el.classList.add('scale-125');
+                setTimeout(() => el.classList.remove('scale-125'), 500);
+                return;
+            }
+            const btnId = type === 'metro' ? 'btnMetro' : type === 'bus' ? 'btnBus' : type === 'interchange' ? 'btnInterchange' : 'btnVehicle';
+            const el = document.getElementById(btnId);
+            if (el) {
+                el.classList.add('scale-110');
+                setTimeout(() => {
+                    el.classList.remove('scale-110');
+                }, 500);
 
-                if (start && end) {
-                    const offset = getSegmentOffset(start, end, this.line);
-                    this.x = start.x + offset.x + (end.x - start.x) * this.progress;
-                    this.y = start.y + offset.y + (end.y - start.y) * this.progress;
-                    this.angle = Math.atan2(end.y - start.y, end.x - start.x);
-                    this.posHistory.unshift({ x: this.x, y: this.y, angle: this.angle });
-                    if (this.posHistory.length > 200) this.posHistory.pop();
-                }
+                const pop = document.createElement('div');
+                pop.className = 'absolute bg-green-500 text-white font-extrabold text-xs px-2 py-0.5 rounded-full shadow-md float-pop pointer-events-none z-50';
+                pop.style.left = `${el.offsetLeft + el.offsetWidth / 2 - 12}px`;
+                pop.style.top = `${el.offsetTop - 15}px`;
+                pop.innerText = '+1';
+                
+                const container = document.getElementById('controlsContainer');
+                container.appendChild(pop);
+                setTimeout(() => pop.remove(), 1000);
+            }
+        }
 
-                if (this.progress >= 1) {
-                    const transferOccurred = this.arriveAtStation(end);
-                    this.progress = 0;
-                    this.currentStationIdx = this.targetStationIdx;
-                    this.targetStationIdx += this.direction;
+        function updateUI() {
+            document.getElementById('scoreDisplay').innerText = state.score;
+            document.getElementById('coinDisplay').innerText = state.coins;
+            document.getElementById('bridgeCount').innerText = state.inventory.bridge;
+            document.getElementById('tunnelCount').innerText = state.inventory.tunnel;
+            
+            const activeMetros = state.lines.filter(l => l.type === 'metro').length;
+            const activeBuses = state.lines.filter(l => l.type === 'bus').length;
 
-                    if (this.targetStationIdx >= this.line.stations.length || this.targetStationIdx < 0) {
+            document.getElementById('metroCount').innerText = state.inventory.metro;
+            document.getElementById('busCount').innerText = state.inventory.bus;
+            document.getElementById('vehicleCount').innerText = state.inventory.vehicle;
+            document.getElementById('interchangeCount').innerText = state.inventory.interchange;
