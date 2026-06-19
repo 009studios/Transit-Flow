@@ -848,6 +848,10 @@
             if (state.stations.length === 0) type = 'square';
             else if (r > 0.8) type = 'triangle';
             else if (r > 0.95 && state.stations.filter(s=>s.type==='square').length < 2) type = 'square';
+			else if (state.score > 50 && r > 0.7) { 
+    const rareShapes = ['pentagon', 'hexagon', 'oval'];
+    type = rareShapes[Math.floor(Math.random() * rareShapes.length)];
+}
 
             let x, y, valid = false;
             let attempts = 0;
