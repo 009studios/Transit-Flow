@@ -793,14 +793,32 @@
 
         // --- STREAMING_CHUNK: Shape builders and procedurally spawning logic... ---
         function drawShape(ctx, x, y, type, size, fill = false) {
-            ctx.beginPath();
-            if (type === 'circle') ctx.arc(x, y, size, 0, Math.PI * 2);
-            else if (type === 'square') ctx.rect(x - size, y - size, size * 2, size * 2);
-            else if (type === 'triangle') {
-                ctx.moveTo(x, y - size); ctx.lineTo(x + size, y + size); ctx.lineTo(x - size, y + size); ctx.closePath();
-            }
-            if (fill) ctx.fill(); else { ctx.fill(); ctx.stroke(); }
+    ctx.beginPath();
+    if (type === 'circle') {
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+    } else if (type === 'square') {
+        ctx.rect(x - size, y - size, size * 2, size * 2);
+    } else if (type === 'triangle') {
+        ctx.moveTo(x, y - size);
+        ctx.lineTo(x + size, y + size); 
+        ctx.lineTo(x - size, y + size); 
+        ctx.closePath();
+    } else if (type === 'hexagon') {
+        for (let i = 0; i < 6; i++) {
+            ctx.lineTo(x + size * Math.cos(i * Math.PI / 3), y + size * Math.sin(i * Math.PI / 3));
         }
+        ctx.closePath();
+    } else if (type === 'pentagon') {
+        for (let i = 0; i < 5; i++) {
+            ctx.lineTo(x + size * Math.cos(i * 2 * Math.PI / 5 - Math.PI / 2), y + size * Math.sin(i * 2 * Math.PI / 5 - Math.PI / 2));
+        }
+        ctx.closePath();
+    } else if (type === 'oval') {
+        ctx.ellipse(x, y, size * 1.2, size * 0.8, 0, 0, Math.PI * 2);
+    }
+    
+    if (fill) ctx.fill(); else { ctx.fill(); ctx.stroke(); }
+}
 
         function resize() {
             const pixelRatio = window.devicePixelRatio || 1;
