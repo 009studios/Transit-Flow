@@ -9,6 +9,7 @@
             colors: {
                 metro: ['#2563EB', '#DC2626', '#4F46E5', '#9333EA', '#0891B2', '#000000'], 
                 bus: ['#F59E0B', '#10B981', '#8B5CF6', '#EC4899', '#64748B', '#84CC16', '#14B8A6', '#F43F5E']
+				
             },
             costs: {
                 bus: 10,
@@ -868,7 +869,27 @@
                 valid = clearOfStations && clearOfRiver;
                 attempts++;
             }
-            if(valid) state.stations.push(new Station(x, y, type));
+        
+        if (valid) {
+            let newStation = new Station(x, y, type);
+            state.stations.push(newStation);
+
+            // --- AUTO-CONNECT LOGIC ---
+            // 1. Check if the new station spawned on an existing track using YOUR function
+            let hoveredSegment = getHoveredLineSegment(x, y);
+
+            if (hoveredSegment.line && hoveredSegment.index !== -1) {
+                // 2. Save a copy of the old stations array so we can fix the vehicles later
+                let oldStations = [...hoveredSegment.line.stations];
+                
+                // 3. Splice the new station into the line's array at the correct point
+                hoveredSegment.line.stations.splice(hoveredSegment.index + 1, 0, newStation);
+                
+                // 4. Use YOUR existing reconcile function so the trains don't glitch out!
+                reconcileVehicles(hoveredSegment.line, oldStations);
+            }
+        }
+}
 			
 let hoveredTrack = getHoveredLineSegment(x, y);
             if (hoveredTrack && hoveredTrack.line) {
