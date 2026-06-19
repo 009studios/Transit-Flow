@@ -793,26 +793,32 @@
 
         // --- STREAMING_CHUNK: Shape builders and procedurally spawning logic... ---
         function drawShape(ctx, x, y, type, size, fill = false) {
-            ctx.beginPath();
-            if (type === 'circle') ctx.arc(x, y, size, 0, Math.PI * 2);
-            else if (type === 'square') ctx.rect(x - size, y - size, size * 2, size * 2);
-            else if (type === 'triangle') {
-                ctx.moveTo(x, y - size); ctx.lineTo(x + size, y + size); ctx.lineTo(x - size, y + size); ctx.closePath();
-            }
-            if (fill) ctx.fill(); else { ctx.fill(); ctx.stroke(); }
+    ctx.beginPath();
+    if (type === 'circle') {
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+    } else if (type === 'square') {
+        ctx.rect(x - size, y - size, size * 2, size * 2);
+    } else if (type === 'triangle') {
+        ctx.moveTo(x, y - size);
+        ctx.lineTo(x + size, y + size); 
+        ctx.lineTo(x - size, y + size); 
+        ctx.closePath();
+    } else if (type === 'hexagon') {
+        for (let i = 0; i < 6; i++) {
+            ctx.lineTo(x + size * Math.cos(i * Math.PI / 3), y + size * Math.sin(i * Math.PI / 3));
         }
-
-        function resize() {
-            const pixelRatio = window.devicePixelRatio || 1;
-            width = window.innerWidth; 
-            height = window.innerHeight;
-            canvas.width = width * pixelRatio; 
-            canvas.height = height * pixelRatio;
-            
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.scale(pixelRatio, pixelRatio);
+        ctx.closePath();
+    } else if (type === 'pentagon') {
+        for (let i = 0; i < 5; i++) {
+            ctx.lineTo(x + size * Math.cos(i * 2 * Math.PI / 5 - Math.PI / 2), y + size * Math.sin(i * 2 * Math.PI / 5 - Math.PI / 2));
         }
-
+        ctx.closePath();
+    } else if (type === 'oval') {
+        ctx.ellipse(x, y, size * 1.2, size * 0.8, 0, 0, Math.PI * 2);
+    }
+    
+    if (fill) ctx.fill(); else { ctx.fill(); ctx.stroke(); }
+}
         function checkMilestones() {
             if (state.score >= state.nextStationScoreTarget) {
                 spawnStation();
@@ -830,6 +836,10 @@
             if (state.stations.length === 0) type = 'square';
             else if (r > 0.8) type = 'triangle';
             else if (r > 0.95 && state.stations.filter(s=>s.type==='square').length < 2) type = 'square';
+			else if (state.score > 100 && r > 0.7) {
+    const rareShapes = ['pentagon', 'hexagon', 'oval'];
+    type = rareShapes[Math.floor(Math.random() * rareShapes.length)];
+}
 
             let x, y, valid = false;
             let attempts = 0;
