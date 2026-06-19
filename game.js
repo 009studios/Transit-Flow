@@ -466,6 +466,18 @@
 
                     if (this.progress >= 1) {
                         const transferOccurred = this.arriveAtStation(end);
+						// --- START OF NEW BILLING LOGIC ---
+                        // 1. Calculate cost based on vehicle type
+                        let tripCost = this.line.type === 'metro' ? 2 : 1;
+                        
+                        // 2. Deduct coins and prevent negative balance
+                        state.coins -= tripCost;
+                        if (state.coins < 0) state.coins = 0;
+                        
+                        // 3. Update the UI Display
+                        let coinUI = document.getElementById('coinDisplay');
+                        if (coinUI) coinUI.innerText = state.coins;
+                        // --- END OF NEW BILLING LOGIC ---
                         this.progress = 0;
                         this.ghostTrip = null;
 
