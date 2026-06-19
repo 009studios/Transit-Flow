@@ -1078,6 +1078,11 @@
                     dot.addEventListener('touchstart', selectDot, { passive: false });
                     busLineDots.appendChild(dot);
                 });
+				for (let i = 0; i < state.inventory.bus; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = "w-2 h-2 rounded-full bg-slate-300 border border-dashed border-slate-400 opacity-65 select-none";
+                    busLineDots.appendChild(dot);
+                }
                 
             }
 
