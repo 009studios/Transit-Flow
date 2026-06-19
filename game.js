@@ -869,6 +869,14 @@
                 attempts++;
             }
             if(valid) state.stations.push(new Station(x, y, type));
+			
+let hoveredTrack = getHoveredLineSegment(x, y);
+            if (hoveredTrack && hoveredTrack.line) {
+                // Insert the new station into the line's array
+                hoveredTrack.line.stations.splice(hoveredTrack.index + 1, 0, newStation);
+                // Fix the vehicles so they don't break
+                reconcileVehicles(hoveredTrack.line, [...hoveredTrack.line.stations]);
+            }
         }
 
         function spawnPassenger() {
