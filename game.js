@@ -909,7 +909,7 @@
         function getHoveredLineSegment(x, y) {
             let closestLine = null;
             let closestIndex = -1;
-            let minDistSq = 400; 
+            let minDistSq = 1200; 
             for (let line of state.lines) {
                 if (line.stations.length < 2) continue;
                 for (let i = 0; i < line.stations.length - 1; i++) {
