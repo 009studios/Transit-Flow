@@ -861,10 +861,10 @@
             if (state.stations.length === 0) type = 'square';
             else if (r > 0.8) type = 'triangle';
             else if (r > 0.95 && state.stations.filter(s=>s.type==='square').length < 2) type = 'square';
-			else if (state.score > 50 && r > 0.7) { 
-    const rareShapes = ['pentagon', 'hexagon', 'oval'];
-    type = rareShapes[Math.floor(Math.random() * rareShapes.length)];
-}
+            else if (state.score > 50 && r > 0.7) { 
+                const rareShapes = ['pentagon', 'hexagon', 'oval'];
+                type = rareShapes[Math.floor(Math.random() * rareShapes.length)];
+            }
 
             let x, y, valid = false;
             let attempts = 0;
@@ -882,33 +882,18 @@
                 attempts++;
             }
         
-        if (valid) {
-            let newStation = new Station(x, y, type);
-            state.stations.push(newStation);
+            if (valid) {
+                let newStation = new Station(x, y, type);
+                state.stations.push(newStation);
 
-            // --- AUTO-CONNECT LOGIC ---
-            // 1. Check if the new station spawned on an existing track using YOUR function
-            let hoveredSegment = getHoveredLineSegment(x, y);
+                // --- AUTO-CONNECT LOGIC ---
+                let hoveredSegment = getHoveredLineSegment(x, y);
 
-            if (hoveredSegment.line && hoveredSegment.index !== -1) {
-                // 2. Save a copy of the old stations array so we can fix the vehicles later
-                let oldStations = [...hoveredSegment.line.stations];
-                
-                // 3. Splice the new station into the line's array at the correct point
-                hoveredSegment.line.stations.splice(hoveredSegment.index + 1, 0, newStation);
-                
-                // 4. Use YOUR existing reconcile function so the trains don't glitch out!
-                reconcileVehicles(hoveredSegment.line, oldStations);
-            }
-        }
-}
-			
-let hoveredTrack = getHoveredLineSegment(x, y);
-            if (hoveredTrack && hoveredTrack.line) {
-                // Insert the new station into the line's array
-                hoveredTrack.line.stations.splice(hoveredTrack.index + 1, 0, newStation);
-                // Fix the vehicles so they don't break
-                reconcileVehicles(hoveredTrack.line, [...hoveredTrack.line.stations]);
+                if (hoveredSegment.line && hoveredSegment.index !== -1) {
+                    let oldStations = [...hoveredSegment.line.stations];
+                    hoveredSegment.line.stations.splice(hoveredSegment.index + 1, 0, newStation);
+                    reconcileVehicles(hoveredSegment.line, oldStations);
+                }
             }
         }
 
